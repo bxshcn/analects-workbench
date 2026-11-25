@@ -12,6 +12,9 @@ npm test                # 单元测试与 DOM 冒烟测试；pretest 会按需�
 npm run data:check      # 仅当 src/data 变化时重建，并执行 R01 到 R24 校验
 npm run data:force      # 强制重建 public/data 与 scripts/output
 npm run data:rules      # 查看全部数据校验规则说明
+npm run deploy          # 构建并部署到 Cloudflare Workers
+npm run deploy:dry-run  # 构建并本地校验 Worker 配置，不上传
+npm run preview:worker  # 构建并用 wrangler dev 本地预览
 ```
 
 `public/data/` 与 `scripts/output/` 都是生成物，已在 `.gitignore` 中忽略、不入库。`npm run dev`、`npm test`、`npm run build` 会通过 `predev`、`pretest`、`prebuild` 调用 `scripts/ensure-data.mjs`：它比对 `public/data/meta.json` 记录的源文件 SHA-256，只有 `src/data` 变化或生成物缺失时才执行 `scripts/build-data.mjs`，否则直接跳过。
@@ -20,6 +23,7 @@ npm run data:rules      # 查看全部数据校验规则说明
 
 ```text
 docs/                  需求与验收清单
+wrangler.jsonc         Cloudflare Workers 静态资源配置
 src/data/              数据源（运行时只读），禁止直接 import
 public/data/           浏览器实际 fetch 的五个数据包（生成物，不入库）
 public/og-preview.jpg  1200×630 社交预览图（当前为占位图）
@@ -50,6 +54,16 @@ src/types/             数据契约类型
 - CI 见 `.github/workflows/ci.yml`：`npm ci` 后依次执行 `data:check`、`npm test`、`npm run build`。
 - 数据统计不硬编码，统一查看 `scripts/output/data-snapshot.md` 与 `scripts/output/data-snapshot.json`。
 - 验收清单见 `docs/acceptance.md`。
+
+## 部署
+
+线上地址：<https://analects.bxshcn.workers.dev>
+
+- `npm run deploy`：构建并部署到 Cloudflare Workers。
+- `npm run deploy:dry-run`：构建并校验 Worker 配置，不上传。
+- `npm run preview:worker`：构建并用 `wrangler dev` 本地预览。
+
+首次部署需要先运行 `npx wrangler login`，并在 Cloudflare 账户中注册 `workers.dev` 子域。
 
 ## 待确认事项
 
