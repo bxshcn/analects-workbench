@@ -570,10 +570,10 @@ meta.json          { version, generatedAt, source, counts, relationCounts, weigh
 - `og:type` 为 `website`；
 - `og:title`；
 - `og:description`；
-- `og:image` 指向 `/og-preview.png`；
+- `og:image` 指向 `/og-preview.jpg`；
 - `twitter:card` 为 `summary_large_image`。
 
-`public/og-preview.png` 必须存在，尺寸 1200×630，使用宣纸白、墨灰、朱砂红、石青蓝的图文卡片。当前仓库已提供同尺寸占位图 `public/og-preview.png`；正式发布前需确认或替换为正式图，并在验收清单中标注占位状态。
+`public/og-preview.jpg` 必须存在，尺寸 1200×630，使用宣纸白、墨灰、朱砂红、石青蓝的图文卡片。当前仓库已提供同尺寸占位图 `public/og-preview.jpg`；正式发布前需确认或替换为正式图，并在验收清单中标注占位状态。
 
 ## 11. 响应式与可访问性
 
@@ -702,7 +702,7 @@ analects-workbench/
 │     ├─ data-snapshot.json
 │     └─ data-snapshot.md
 ├─ public/
-│  ├─ og-preview.png
+│  ├─ og-preview.jpg
 │  └─ data/
 │     ├─ core-graph.json
 │     ├─ node-details.json
@@ -744,5 +744,5 @@ node scripts/validate-data.mjs --rules
 - `public/data` 的五个文件存在；
 - `core-graph.json` 的 gzip 体积小于 30KB；
 - 首屏不请求 `node-details.json`、`co-edges.json`、`verses.json`；
-- `public/og-preview.png` 存在且为 1200×630；当前为占位图，正式发布前需确认或替换；
+- `public/og-preview.jpg` 存在且为 1200×630；当前为占位图，正式发布前需确认或替换；
 - 需要核对数据统计时查看 `scripts/output/data-snapshot.md`。

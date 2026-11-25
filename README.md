@@ -22,7 +22,7 @@ npm run data:rules      # 查看全部数据校验规则说明
 docs/                  需求与验收清单
 src/data/              只读数据源，运行时禁止 import
 public/data/           浏览器实际 fetch 的五个数据包（生成物，不入库）
-public/og-preview.png  1200×630 社交预览图（当前为占位图）
+public/og-preview.jpg  1200×630 社交预览图（当前为占位图）
 scripts/               数据构建、按需重建与校验脚本
 scripts/output/        构建报告与数据快照（生成物，不入库）
 src/components/        图表、索引区与通用 UI
@@ -53,7 +53,7 @@ src/types/             数据契约类型
 
 ## 待确认事项
 
-`public/og-preview.png` 为 1200×630 占位图，正式发布前需替换为正式视觉稿。
+`public/og-preview.jpg` 为 1200×630 占位图，正式发布前需替换为正式视觉稿。
 
 ## 无障碍与响应式
 

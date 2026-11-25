@@ -48,11 +48,11 @@
 - [x] `popstate` 重新解析；交互使用 `replaceState`；历史不写入 URL。
 - [x] `document.title` 随锚点更新，格式为 `节点名 · 《论语》知识图谱`。
 - [x] 静态 SEO、Open Graph、Twitter Card 与 `noscript` 摘要齐备。
-- [x] `public/og-preview.png` 存在且为 1200×630。
+- [x] `public/og-preview.jpg` 存在且为 1200×630。
 - [x] 生产构建通过（`npm run build`）。
 - [x] 单元测试与 DOM/真实数据冒烟测试通过（`npm test`）。
 
 ## 占位与待确认
 
-- [ ] `public/og-preview.png` 为占位图，正式发布前需确认或替换为正式视觉稿。
+- [ ] `public/og-preview.jpg` 为占位图，正式发布前需确认或替换为正式视觉稿。
 - [x] 数据源与报告已生成；统计值以快照报告为准。
