@@ -152,6 +152,7 @@ function validateSource(nodes, edges, verses) {
     }
     if (node.alias !== undefined) {
       assert(Array.isArray(node.alias), `alias 不是数组: ${node.id}`);
+      assert(node.alias.length > 0, `alias 不得为空数组: ${node.id}`);
       const aliasSet = new Set();
       for (const alias of node.alias) {
         assert(typeof alias === "string" && alias.length > 0, `alias 非法: ${node.id}`);
@@ -326,8 +327,11 @@ function main() {
   const nodeStats = buildNodeStats(nodes, edges);
 
   const relationCounts = {};
+  for (const relation of EDGE_RELATIONS) {
+    relationCounts[relation] = 0;
+  }
   for (const edge of edges) {
-    relationCounts[edge.relation] = (relationCounts[edge.relation] || 0) + 1;
+    relationCounts[edge.relation] += 1;
   }
 
   const coreGraph = {

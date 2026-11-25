@@ -1,18 +1,8 @@
-# 只读数据源
+# 数据源说明
 
-本目录是本项目的唯一数据源，来源于：
+本目录是本项目维护的唯一数据源，运行时只读；人物、关系、章句与注疏的修订直接在本目录进行。
 
-`../analects-viz/src/data/{nodes.json,edges.json,verses.json}`
-
-复制到本项目后已做如下裁剪，源数据本身不再修改：
-
-| 文件 | 裁剪内容 |
-|---|---|
-| `nodes.json` | 删除 `weight`、`degree`；删除未被任何剩余边引用的节点 |
-| `edges.json` | 删除原数据第 4 类人物关系；删除 `weight`；删除 `relation_zh` |
-| `verses.json` | 原样复制，作为章句唯一权威源 |
-
-数据规模、关系分布与数据包体积不再写入本文件。构建后统一查看：
+数据规模、关系分布与数据包体积在构建后统一查看：
 
 - `scripts/output/data-snapshot.md`：人类可读快照；
 - `scripts/output/data-snapshot.json`：结构化快照；
@@ -34,7 +24,7 @@
 | `commentary` | 注疏/扩展释义 |
 | `alias` | 可选别名数组 |
 
-源文件不包含 `weight` 与 `degree`。
+必填字段：`id`、`type`、`canonical_name`、`source_refs`、`gloss`、`commentary`；`alias` 可选。`source_refs` 至少包含一个章句 `code`。
 
 ### edges.json
 
@@ -47,7 +37,7 @@
 | `share_refs` | 该边关联的章句 `code` 列表 |
 | `source` | 可选出处说明 |
 
-源文件不包含 `weight` 与 `relation_zh`。
+必填字段：`source_id`、`target_id`、`relation`、`directed`、`share_refs`；`source` 可选。`share_refs` 至少包含一个章句 `code`。
 
 ### verses.json
 
@@ -62,6 +52,8 @@
 | `annotation` | 注释 |
 | `commentary` | 疏解 |
 | `critique` | 评析 |
+
+全部字段必填；`gloss`、`annotation`、`commentary`、`critique` 必须是字符串，可为空字符串。
 
 ## 派生规则
 
@@ -103,14 +95,16 @@ npm run data:rules      # 查看全部关系规则说明
 
 | 文件 | 内容 |
 |---|---|
-| `public/data/core-graph.json` | 当前全部可视类型节点 + 当前全部强语义边（含派生 `weight` 与 `relation_zh`） |
-| `public/data/node-details.json` | 当前全部节点的基础元数据 + `gloss` + `commentary` |
-| `public/data/co-edges.json` | 当前全部共现边（含派生 `weight` 与 `relation_zh`） |
-| `public/data/verses.json` | 当前全部章句 |
-| `public/data/meta.json` | 由当前数据派生的计数、版本、源文件 SHA-256、关系分布 |
-| `scripts/output/data-report.json` | 调试统计：`node.degree`、`node.weight`、关系权重、Top 节点 |
-| `scripts/output/data-snapshot.md` | 人类可读数据快照：计数、关系分布、包体积、Tab1、核心/扩展、别名与完整性 |
-| `scripts/output/data-snapshot.json` | 与 Markdown 同源的结构化数据快照 |
+| `public/data/core-graph.json` | 全部可视类型节点与全部强语义边；边包含派生 `weight` 与 `relation_zh` |
+| `public/data/node-details.json` | 键为节点 `id` 的对象映射，包含全部节点的 `id`、`type`、`canonical_name`、`source_refs`、`gloss`、`commentary` 与可选 `alias` |
+| `public/data/co-edges.json` | 全部共现边；边包含派生 `weight` 与 `relation_zh` |
+| `public/data/verses.json` | 全部章句，与 `src/data/verses.json` 完全一致 |
+| `public/data/meta.json` | `version`、`generatedAt`、`source`（三个源文件 SHA-256）、`counts`、`relationCounts`、`weightRule`、`note` |
+| `scripts/output/data-report.json` | 调试统计：`generatedAt`、`counts`、`relationCounts`、`topByDegree`、`topByWeight`、`nodes`（含 `degree`、`weight`、`inWeight`、`outWeight`、`relationWeights`、`strongWeight`、`coWeight`、`isCore`）与 `weights` 汇总 |
+| `scripts/output/data-snapshot.md` | 人类可读快照：基础计数、关系分布、数据包体积、Tab1 人物关系、核心/扩展、别名与高亮、完整性 |
+| `scripts/output/data-snapshot.json` | 与 Markdown 同源的结构化快照，并包含 `packages` 体积统计 |
+
+`public/data` 与 `scripts/output` 是生成物，不要手工编辑；下次 `npm run data:build` 会覆盖它们。
 
 ## 校验规则
 
@@ -118,30 +112,30 @@ npm run data:rules      # 查看全部关系规则说明
 
 | 规则 | 说明 |
 |---|---|
-| R01 源文件可读取 | 三个源 JSON 必须存在且可解析 |
-| R02 章句结构 | 唯一且非空 `id` 与 `code`、1 到 20 的 `chapter_num`、非空 `chapter_title` 与 `verse`；注疏字段必须是字符串 |
-| R03 节点结构 | 必填字段齐全；不得包含 `weight`、`degree` 或未知字段 |
-| R04 节点 ID 唯一 | 节点 `id` 不得重复 |
-| R05 节点类型 | 必须是 8 类之一 |
-| R06 节点出处 | `source_refs` 非空、无重复、全部指向存在的章句 |
-| R07 节点别名 | `alias` 若存在，必须是非空字符串数组且无重复 |
-| R08 边结构 | 必填字段齐全；不得包含 `weight`、`relation_zh` 或未知字段 |
-| R09 边关系与方向 | 关系必须是 8 类之一；对称关系 `directed` 为 `false`，其余为 `true` |
+| R01 源文件可读取 | `src/data/nodes.json`、`edges.json`、`verses.json` 必须存在且可解析为 JSON |
+| R02 章句结构 | `id` 与 `code` 唯一且非空；`chapter_num` 为 1 到 20 的整数；`chapter_title`、`verse` 为非空字符串；`gloss`、`annotation`、`commentary`、`critique` 为字符串（可为空）；不得含未知字段 |
+| R03 节点结构 | 必须包含 `id`、`type`、`canonical_name`、`source_refs`、`gloss`、`commentary`；`id`、`canonical_name` 非空，`gloss`、`commentary` 为字符串；不得含 `weight`、`degree` 或未知字段 |
+| R04 节点 ID 唯一 | 所有节点 `id` 不得重复 |
+| R05 节点类型 | `type` 必须是 8 类之一：`person`、`virtue`、`vice`、`persona`、`institution`、`office`、`polity`、`role` |
+| R06 节点出处 | `source_refs` 必须是非空字符串数组、元素不得重复，且全部指向存在的章句 `code` |
+| R07 节点别名 | `alias` 可选；若存在，必须是非空字符串数组且元素不得重复 |
+| R08 边结构 | 必须包含 `source_id`、`target_id`、`relation`、`directed`、`share_refs`；`source` 可选但必须是字符串；不得含 `weight`、`relation_zh` 或未知字段 |
+| R09 边关系与方向 | `relation` 必须是 8 类之一；`CONTRASTS_WITH` 与 `CO_OCCURS_WITH` 的 `directed` 必须为 `false`，其余为 `true` |
 | R10 边端点 | 两端节点必须存在，且不能是同一个节点 |
-| R11 边共享章句 | `share_refs` 非空、无重复、全部指向存在的章句 |
-| R12 强边端点类型 | 强语义边两端必须是可视类型节点 |
+| R11 边共享章句 | `share_refs` 必须是非空字符串数组、元素不得重复，且全部指向存在的章句 `code` |
+| R12 强边端点类型 | 7 类强语义边的两端必须是可视类型节点：`person`、`virtue`、`vice`、`persona` |
 | R13 边键唯一 | `source_id`、`relation`、`target_id` 三元组不得重复 |
-| R14 无孤儿节点 | 每个节点至少被一条边引用 |
-| R15 核心包节点集合 | 必须等于源数据全部可视类型节点；不得含 `gloss`、`commentary`、`weight`、`degree` |
-| R16 核心包边集合 | 必须等于源数据全部强语义边；`share_refs`、`weight`、`relation_zh`、`directed` 与端点必须与源一致，且不得含未知字段 |
-| R17 共现包边集合 | 必须等于源数据全部共现边；`share_refs`、`weight`、`relation_zh`、`directed` 与端点必须与源一致，且不得含未知字段 |
-| R18 详情包集合 | 键集合必须等于源节点集合；字段与源一致 |
-| R19 章句包一致 | `public/data/verses.json` 必须与源章句完全一致 |
-| R20 计数由数据派生 | `meta.counts` 必须等于按当前数据计算出的数量 |
-| R21 关系计数由数据派生 | `meta.relationCounts` 必须等于当前关系分布 |
-| R22 源文件哈希 | `meta.source` 的 SHA-256 必须与当前源文件一致 |
-| R23 包完整性 | 源边必须且只能出现在核心包或共现包；源节点必须全部出现在详情包 |
-| R24 派生权重一致 | 所有生成边 `weight` 必须等于 `share_refs.length` 且大于 0 |
+| R14 无孤儿节点 | 每个节点至少被一条边（含共现边）引用 |
+| R15 核心包节点集合 | `core-graph.nodes` 必须等于源数据全部可视类型节点；只允许 `id`、`type`、`canonical_name`、`source_refs`、`alias`，且字段值须与源一致；不得含 `gloss`、`commentary`、`weight`、`degree` 或未知字段 |
+| R16 核心包边集合 | `core-graph.edges` 必须等于源数据全部强语义边；`share_refs` 与 `directed` 须与源一致；`relation_zh` 须符合映射；`weight` 须等于 `share_refs.length` 且大于 0；两端须存在于 `core-graph.nodes`；除可选 `source` 外不得含未知字段 |
+| R17 共现包边集合 | `co-edges.edges` 必须等于源数据全部共现边；`relation` 须为 `CO_OCCURS_WITH`，`directed` 须为 `false`；`share_refs` 须与源一致；`relation_zh` 须为“共现”；`weight` 须等于 `share_refs.length` 且大于 0；两端须存在于 `node-details`；除可选 `source` 外不得含未知字段 |
+| R18 详情包集合 | `node-details` 必须是键为节点 `id` 的对象映射，键集合等于全部源节点；`id`、`type`、`canonical_name`、`source_refs`、`gloss`、`commentary`、`alias` 须与源一致；不得含 `weight`、`degree` 或未知字段 |
+| R19 章句包一致 | `public/data/verses.json` 必须与 `src/data/verses.json` 完全一致，包括条目顺序与字段顺序 |
+| R20 计数由数据派生 | `meta.counts` 必须与当前数据计算值一致，包含 `nodes`、`edges`、`strongEdges`、`coOccurrenceEdges`、`verses`、`coreGraphNodes`、`coreNodes`、`extendedNodes` |
+| R21 关系计数由数据派生 | `meta.relationCounts` 必须包含全部 8 类关系，且每类计数等于当前边分布；出现未知关系键即失败 |
+| R22 源文件哈希 | `meta.source.nodesSha256`、`edgesSha256`、`versesSha256` 必须分别与当前三个源文件的 SHA-256 一致 |
+| R23 包完整性 | 每条源边必须且只能出现在 `core-graph` 或 `co-edges` 中；全部可视节点必须出现在 `core-graph` 中 |
+| R24 派生权重一致 | 核心包与共现包中所有生成边的 `weight` 必须等于 `share_refs.length` 且大于 0 |
 
 新增或修改数据时必须满足上述规则，例如：
 
@@ -150,5 +144,7 @@ npm run data:rules      # 查看全部关系规则说明
 - 强语义边只能连接可视类型节点。
 - 不得添加重复边、自环边或孤儿节点。
 - 源 `edges.json` 不得写 `weight`、`relation_zh`；它们在拆分阶段生成。
+
+修改完成后运行 `npm run data:check`，确认 R01 到 R24 全部通过后再提交 Pull Request。
 
 App 只允许 `fetch` `public/data`，禁止直接 import 本目录的 JSON。

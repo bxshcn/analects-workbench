@@ -330,6 +330,7 @@ function validateSource() {
     if (node.alias !== undefined) {
       check(Array.isArray(node.alias), "R07", `节点 ${node.id} 的 alias 必须是数组`);
       if (Array.isArray(node.alias)) {
+        check(node.alias.length > 0, "R07", `节点 ${node.id} 的 alias 不得为空数组`);
         const seen = new Set();
         for (const alias of node.alias) {
           check(typeof alias === "string" && alias.length > 0, "R07", `节点 ${node.id} 的 alias 含非法值`);
